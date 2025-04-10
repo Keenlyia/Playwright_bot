@@ -94,7 +94,7 @@ with sync_playwright() as p:
         product_info["discount_price"] = None
 
     try:
-        images = page.locator("//img[@class='thumbnail-button__picture']").all()
+        images = page.locator("//img[@class='image']").all()
         product_info["image_urls"] = [img.get_attribute("src") for img in images]
     except (TimeoutError, AttributeError):
         product_info["image_urls"] = []
@@ -109,6 +109,13 @@ with sync_playwright() as p:
         product_info["reviews"] = page.locator("//li[@class='tabs__item'][3]/rz-indexed-link/a/span").text_content()
     except (TimeoutError, AttributeError):
         product_info["reviews"] = None
+
+
+    # navigation to the characteristics page
+    time.sleep(2)
+    page.locator("//rz-indexed-link[@class='tabs__link']/a").first.click()
+    time.sleep(2)
+
 
     try:
         keys = page.locator("//dt[@class='label']").all()

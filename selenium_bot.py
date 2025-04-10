@@ -59,7 +59,7 @@ DRIVER_PATH = "../Playwright_bot/chromedriver.exe"
 service = Service(executable_path=DRIVER_PATH)
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-driver.maximize_window()
+# driver.maximize_window()
 driver.get("https://rozetka.com.ua/")
 time.sleep(2)
 
@@ -99,8 +99,6 @@ except NoSuchElementException:
 
 try:
     product_info["seller"] = driver.find_element(By.XPATH, "//p[@class='seller-title']/span[@class='seller-logo']/img").get_attribute("alt")
-except NoSuchElementException:
-    product_info["seller"] = None
 except AttributeError:
     product_info["seller"] = None
 
@@ -115,16 +113,18 @@ except NoSuchElementException:
     product_info["discount_price"] = None
 
 try:
-    images = driver.find_elements(By.XPATH, "//img[@class='thumbnail-button__picture']")
+    images = driver.find_elements(By.XPATH, "//img[@class='image']")
     product_info["image_urls"] = [img.get_attribute("src") for img in images]
 except NoSuchElementException:
-    product_info["image_urls"] = []
+    product_info["image_urls"] = None
 
+time.sleep(2)
 try:
-    product_info["product_code"] = driver.find_element(By.XPATH, "//div[@class='rating text-base']/span").text
-    product_info["product_code"] = product_info["product_code"].replace("Код: ", "").strip()
+    product_text_code = driver.find_elements(By.XPATH, "//span[@class='ms-auto color-black-60']")
+    product_info["product_code"] = ''.join([char.text for char in product_text_code]).replace("Код: ", "").strip()
 except NoSuchElementException:
     product_info["product_code"] = None
+#
 
 try:
     product_info["reviews"] = driver.find_element(By.XPATH, "//li[@class='tabs__item'][3]/rz-indexed-link/a/span").text
@@ -135,19 +135,23 @@ try:
     characteristics_elements = driver.find_elements(By.XPATH, "//dl/div[@class='item']/dd/ul/li/rz-indexed-link/a/span")
     product_info["characteristics"] = [char.text for char in characteristics_elements]
 except NoSuchElementException:
-    product_info["characteristics"] = []
+    product_info["characteristics"] = None
+
+# navigation to the characteristics page
+driver.find_element(By.XPATH, "//rz-indexed-link[@class='tabs__link']/a").click()
+time.sleep(2)
 
 try:
     keys = driver.find_elements(By.XPATH, "//dt[@class='label']")
     keys_array = [key.text for key in keys]
 except NoSuchElementException:
-    keys_array = []
+    keys_array = None
 
 try:
     values = driver.find_elements(By.XPATH, "//dd[@class='value']")
     values_array = [value.text for value in values]
 except NoSuchElementException:
-    values_array = []
+    values_array = None
 
 if keys_array and values_array:
     product_info['characteristics'] = dict(zip(keys_array, values_array))
@@ -164,3 +168,4 @@ for key, value in product_info.items():
 save_to_excel(product_info)
 
 print("Data successfully saved to 'templates/selenium_template.xlsx'.")
+# print(new_product_code)
