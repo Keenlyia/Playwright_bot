@@ -120,14 +120,14 @@ with sync_playwright() as p:
     try:
         keys = page.locator("//dt[@class='label']").all()
         keys_array = [key.text_content() for key in keys]
-    except Exception as e:
+    except AttributeError as e:
         keys_array = []
         print(f"Error extracting keys: {e}")
 
     try:
         values = page.locator("//dd[@class='value']").all()
         values_array = [value.text_content() for value in values]
-    except Exception as e:
+    except AttributeError as e:
         values_array = []
         print(f"Error extracting values: {e}")
 
